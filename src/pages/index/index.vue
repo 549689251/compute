@@ -17,7 +17,7 @@
       <div class="content-wapper">
         <span>工资</span>
         <label>
-          <input type="text" v-model="param.salary" placeholder="请输入你的工资" pattern="[0-9]"/>
+          <input type="text" v-model="param.salary" @input="change(param.salary,0)" placeholder="请输入你的工资"/>
         </label>
         <div class="unit">元</div>
       </div>
@@ -33,7 +33,8 @@
       <div class="content-wapper">
         <span>总额</span>
         <label>
-          <input type="text" v-model="param.social_insurance" placeholder="请输入社保和公积金的总额" pattern="[0-9]"/>
+          <input type="text" v-model="param.social_insurance" @input="change(param.social_insurance,1)"
+                 placeholder="请输入社保和公积金的总额"/>
         </label>
         <div class="unit">元</div>
       </div>
@@ -48,7 +49,8 @@
       <div class="content-wapper">
         <span>总额</span>
         <label>
-          <input type="text" v-model="param.social_plus" placeholder="请输入专项扣除总额" pattern="[0-9]"/>
+          <input type="text" v-model="param.social_plus" @input="change(param.social_plus,2)"
+                 placeholder="请输入专项扣除总额"/>
         </label>
         <div class="unit">元</div>
       </div>
@@ -57,7 +59,7 @@
     <div style="margin-top: 20px">
       <div class="tips-wapper">
         <span style="color: #fb883c;font-size: 12px;margin-left: .38rem">
-                  注意：本次计算个税起点5000元
+                  注意：本次计算个税起点5000元。
         </span>
       </div>
     </div>
@@ -80,9 +82,9 @@
           remainingAssets: false
         },
         param: {
-          salary: '',
-          social_insurance: '',
-          social_plus: '',
+          salary: "",
+          social_insurance: "",
+          social_plus: "",
           entryCustDto: ''
         },
         computeResult: []
@@ -93,6 +95,33 @@
 
     methods: {
       submit() {
+
+        if (this.param.salary === null || this.param.salary === "" || this.param.salary === undefined) {
+          wx.showToast({
+            title: '请输入正确的金额格式',
+            icon: "none",
+            duration: 2000
+          });
+          return;
+        }
+
+        if (this.param.social_insurance === "") {
+          this.param.social_insurance = 0;
+        }
+
+        if (this.param.social_plus === "") {
+          this.param.social_plus = 0;
+        }
+
+        if (parseFloat(this.param.salary) - parseFloat(this.param.social_insurance) - parseFloat(this.param.social_plus) <= 5000) {
+          wx.showToast({
+            title: '您不用缴税收',
+            icon: "none",
+            duration: 2000
+          });
+          return;
+        }
+
         store.state.handleResult = [];
         this.computeResult = [];
         //之前月份税收总金额
@@ -107,19 +136,19 @@
           if (adjective < 36000) {
             result = adjective * 0.03 - oldMonthSum;
             result = Math.floor(result * 100) / 100;
-          } else if (adjective > 36000 && adjective < 144000) {
+          } else if (adjective > 36000 && adjective <= 144000) {
             result = adjective * 0.1 - 2520 - oldMonthSum;
             result = Math.floor(result * 100) / 100;
-          } else if (adjective > 144000 && adjective < 300000) {
+          } else if (adjective > 144000 && adjective <= 300000) {
             result = adjective * 0.2 - 16920 - oldMonthSum;
             result = Math.floor(result * 100) / 100;
-          } else if (adjective > 300000 && adjective < 420000) {
+          } else if (adjective > 300000 && adjective <= 420000) {
             result = adjective * 0.25 - 31920 - oldMonthSum;
             result = Math.floor(result * 100) / 100;
-          } else if (adjective > 420000 && adjective < 660000) {
+          } else if (adjective > 420000 && adjective <= 660000) {
             result = adjective * 0.3 - 52920 - oldMonthSum;
             result = Math.floor(result * 100) / 100;
-          } else if (adjective > 660000 && adjective < 960000) {
+          } else if (adjective > 660000 && adjective <= 960000) {
             result = adjective * 0.35 - 85920 - oldMonthSum;
             result = Math.floor(result * 100) / 100;
           } else if (adjective > 960000) {
@@ -134,8 +163,40 @@
         console.log(store.state.handleResult.toString())
         const url = '../result/main';
         wx.navigateTo({url})
-      }
 
+      },
+      change(val, index) {
+        val = val.replace(/(^\s*)|(\s*$)/g, "")
+        if (!val) {
+          if (index === 0) {
+            this.param.salary = "";
+          } else if (index === 1) {
+            this.param.social_insurance = "";
+          } else {
+            this.param.social_plus = "";
+          }
+          return
+        }
+        var reg = /[^\d.]/g
+
+        // 只能是数字和小数点，不能是其他输入
+        val = val.replace(reg, "")
+
+        // 保证第一位只能是数字，不能是点
+        val = val.replace(/^\./g, "");
+        // 小数只能出现1位
+        val = val.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".");
+        // 小数点后面保留2位
+        val = val.replace(/^(\-)*(\d+)\.(\d\d).*$/, '$1$2.$3');
+
+        if (index === 0) {
+          this.param.salary = val;
+        } else if (index === 1) {
+          this.param.social_insurance = val;
+        } else {
+          this.param.social_plus = val;
+        }
+      }
     },
 
     created() {

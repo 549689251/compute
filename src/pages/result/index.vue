@@ -5,7 +5,7 @@
         <view class="th">月份</view>
         <view class="th">应该缴纳金额</view>
       </view>
-      <div class="item-wapper" v-for="(item, index) in result">
+      <div class="item-wapper" v-for="(item, index) in result" :key="index">
         <view class="td">第{{item.index}}月应缴税收</view>
         <view class="td">{{item.content}} 元</view>
       </div>
@@ -47,8 +47,7 @@
   .home-wapper {
     width: 100%;
     height: 100%;
-
-    background: #FAFBFC;
+    background: white;
 
     .table {
       border: 0px solid darkgray;

@@ -6,4 +6,3 @@ App.mpType = 'app'
 
 const app = new Vue(App)
 app.$mount()
-wxd9f26dcb76702df2
