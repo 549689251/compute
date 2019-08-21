@@ -13,4 +13,4 @@
   
   
 
-<img src="https://github.com/549689251/compute/blob/master/static/images/WechatIMG24.jpg"  height="200" width="200">
+<img src="./static/images/WechatIMG23.jpg"  height="200" width="200">
