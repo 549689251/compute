@@ -1,5 +1,5 @@
 <template>
-  <div @click="clickHandle" class="home-wapper">
+  <div class="home-wapper">
 
 
     <div class="title-wapper">
